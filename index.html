@@ -14,7 +14,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stone Rabbit Technologies LLC — AI-Driven Software Development</title>
   <meta name="description" content="Stone Rabbit Technologies LLC builds custom apps, websites, and native programs — engineered by a software developer who leverages AI to ship faster, smarter solutions." />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#050506" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="Stone Rabbit Technologies LLC" />
@@ -23,18 +23,29 @@
   <meta property="og:url" content="https://stonerabbittechnologies.com" />
   <meta property="og:image" content="assets/logo.png" />
 
+  <link rel="preload" as="image" href="assets/wallpaper.png" fetchpriority="high" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="apple-touch-icon" href="assets/favicon.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <!-- Skip link for accessibility -->
   <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ===== Fixed wallpaper backdrop ===== -->
+  <div class="bg-layer" aria-hidden="true"></div>
+
+  <!-- ===== Scroll-generated code rail ===== -->
+  <div class="code-rail" aria-hidden="true">
+    <div class="code-rail-inner">
+      <div class="code-stream" id="codeStream"></div>
+    </div>
+  </div>
 
   <!-- ===== Header ===== -->
   <header class="site-header" id="header">
@@ -72,7 +83,6 @@
   <main id="main">
     <!-- ===== Hero ===== -->
     <section class="hero" id="top">
-      <div class="hero-grid-bg" aria-hidden="true"></div>
       <div class="container hero-inner">
         <div class="hero-copy reveal">
           <span class="eyebrow"><span class="pulse-dot"></span> Stone Rabbit Technologies LLC</span>
@@ -92,15 +102,6 @@
             <div class="stat"><span class="stat-num" data-count="60" data-suffix="%">0%</span><span class="stat-label">Workflow automated for clients</span></div>
             <div class="stat"><span class="stat-num" data-count="3.5" data-suffix=" FTE">0</span><span class="stat-label">Hours/day saved on key tasks</span></div>
             <div class="stat"><span class="stat-num" data-count="10" data-suffix="+">0+</span><span class="stat-label">Languages &amp; frameworks</span></div>
-          </div>
-        </div>
-
-        <div class="hero-visual reveal" aria-hidden="true">
-          <div class="logo-orbit">
-            <div class="orbit-ring ring-1"></div>
-            <div class="orbit-ring ring-2"></div>
-            <img src="assets/logo.png" alt="" class="hero-logo" />
-            <div class="glow"></div>
           </div>
         </div>
       </div>

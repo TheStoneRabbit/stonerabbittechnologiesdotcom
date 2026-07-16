@@ -81,19 +81,198 @@
     counters.forEach(function (el) { cio.observe(el); });
   }
 
-  /* ---- Subtle parallax on hero logo ---- */
-  var heroLogo = document.querySelector('.hero-logo');
-  if (heroLogo && !prefersReduced && window.matchMedia('(pointer:fine)').matches) {
-    var orbit = document.querySelector('.logo-orbit');
-    orbit.addEventListener('mousemove', function (e) {
-      var r = orbit.getBoundingClientRect();
-      var x = (e.clientX - r.left) / r.width - 0.5;
-      var y = (e.clientY - r.top) / r.height - 0.5;
-      heroLogo.style.transform = 'translate(' + x * 18 + 'px,' + (y * 18 - 6) + 'px) rotate(' + x * 4 + 'deg)';
-    });
-    orbit.addEventListener('mouseleave', function () {
-      heroLogo.style.transform = '';
-    });
+  /* ---- Scroll-generated code rail ----
+     Scrolling emits characters; a slow idle drip keeps it alive when the
+     page is still. Each new glyph scrambles before settling into place. */
+  var stream = document.getElementById('codeStream');
+  if (stream && !prefersReduced) {
+    var SOURCE = [
+      '// build secure',
+      'function build() {',
+      '  let idea = true;',
+      '  let plan = code(idea);',
+      '  let result = automate(plan);',
+      '  return scale(result);',
+      '}',
+      '',
+      '// automate everything',
+      'function automate(plan) {',
+      '  // scripts. workflows. systems.',
+      '  return efficiency.max();',
+      '}',
+      '',
+      '// scale the impact',
+      'function scale(result) {',
+      '  // do more with less',
+      '  return growth.infinite();',
+      '}',
+      '',
+      '// engineered, not generated',
+      'async function review(draft) {',
+      '  // ai drafts. engineers decide.',
+      '  await test(draft);',
+      '  return quality.verified();',
+      '}',
+      '',
+      '// stonerabbit mindset',
+      '// solve real problems',
+      '// ship fast',
+      '// repeat',
+      ''
+    ];
+
+    var GLYPHS = '01<>{}[]/\\|=+*&%$#@!?abcdefxyz'; // matrix scramble set
+    var TOKEN = /(\/\/.*$)|('[^']*')|(\b(?:function|async|await|let|const|return|new|if|else|for|while|true|false|null)\b)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*(?=\s*\())|([{}();=.,:+\-<>[\]])/g;
+
+    function esc(s) {
+      return s.replace(/[&<>]/g, function (c) {
+        return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+      });
+    }
+
+    function highlight(src) {
+      var out = '', last = 0, m;
+      TOKEN.lastIndex = 0;
+      while ((m = TOKEN.exec(src)) !== null) {
+        out += esc(src.slice(last, m.index));
+        var cls = m[1] ? 'c-com' : m[2] ? 'c-str' : m[3] ? 'c-kw'
+                : m[4] ? 'c-num' : m[5] ? 'c-fn' : 'c-pun';
+        out += '<span class="' + cls + '">' + esc(m[0]) + '</span>';
+        last = m.index + m[0].length;
+      }
+      return out + esc(src.slice(last));
+    }
+
+    var srcIndex = 0;    // which SOURCE line we're typing
+    var charIndex = 0;   // how far into it
+    var headTicks = 0;   // frames the newest glyph keeps scrambling
+    var budget = 0;      // characters owed, fed by scrolling
+    var lastY = window.scrollY;
+    var lastFrame = 0;
+    var line = null;
+    var maxLines = 0;
+
+    function measure() {
+      var rail = document.querySelector('.code-rail');
+      if (!rail) return;
+      var lh = parseFloat(getComputedStyle(stream).lineHeight) || 24;
+      maxLines = Math.max(4, Math.floor(rail.clientHeight / lh));
+    }
+    measure();
+    window.addEventListener('resize', measure);
+
+    function retire(el) {
+      el.style.height = el.offsetHeight + 'px';
+      el.classList.add('out');
+      requestAnimationFrame(function () { el.style.height = '0px'; });
+      setTimeout(function () { el.remove(); }, 520);
+    }
+
+    function trim() {
+      // count only live lines — retiring ones are already collapsing
+      var live = stream.querySelectorAll('.code-line:not(.out)');
+      for (var i = 0; i + maxLines < live.length; i++) retire(live[i]);
+    }
+
+    function newLine() {
+      line = document.createElement('div');
+      line.className = 'code-line';
+      if (SOURCE[srcIndex] === '') {
+        line.classList.add('spacer');
+        line.innerHTML = '&nbsp;';
+      }
+      stream.appendChild(line);
+      trim();
+    }
+
+    function render() {
+      if (!line || line.classList.contains('spacer')) return;
+      var text = SOURCE[srcIndex];
+      var sub = text.slice(0, charIndex);
+      var html;
+      if (headTicks > 0 && sub.length) {
+        var glyph = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        html = highlight(sub.slice(0, -1)) + '<span class="c-head">' + esc(glyph) + '</span>';
+      } else {
+        html = highlight(sub);
+      }
+      if (charIndex < text.length) html += '<span class="caret"></span>';
+      line.innerHTML = html;
+    }
+
+    function advance() {
+      var text = SOURCE[srcIndex];
+      if (line === null) newLine();
+
+      if (text === '' || charIndex >= text.length) {
+        // Settle the last glyph before leaving, or the finished line keeps
+        // its scramble character forever.
+        headTicks = 0;
+        render();
+        srcIndex = (srcIndex + 1) % SOURCE.length;
+        charIndex = 0;
+        line = null;
+        newLine();
+        render();
+        return;
+      }
+      charIndex++;
+      headTicks = 3;
+      render();
+    }
+
+    window.addEventListener('scroll', function () {
+      var delta = Math.abs(window.scrollY - lastY);
+      lastY = window.scrollY;
+      budget = Math.min(budget + delta * 0.32, 180); // cap so a fling can't dump the whole file
+    }, { passive: true });
+
+    function frame(ts) {
+      var dt = lastFrame ? Math.min((ts - lastFrame) / 1000, 0.1) : 0;
+      lastFrame = ts;
+
+      budget += dt * 9; // idle drip
+
+      var emitted = 0;
+      while (budget >= 1 && emitted < 6) { // clamp per-frame work
+        budget -= 1;
+        advance();
+        emitted++;
+      }
+
+      if (!emitted && headTicks > 0) {
+        headTicks--;      // flickers through glyphs, then settles into the real character
+        render();
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    /* Start with a screenful already "written" — otherwise a visitor who
+       doesn't scroll stares at an empty column while it drips out. */
+    function seed(count) {
+      for (var i = 0; i < count; i++) {
+        var text = SOURCE[srcIndex];
+        var el = document.createElement('div');
+        el.className = 'code-line';
+        el.style.animation = 'none'; // these were never "typed", so don't fade them in
+        if (text === '') {
+          el.classList.add('spacer');
+          el.innerHTML = '&nbsp;';
+        } else {
+          el.innerHTML = highlight(text);
+        }
+        stream.appendChild(el);
+        srcIndex = (srcIndex + 1) % SOURCE.length;
+      }
+      charIndex = 0;
+      line = null;
+    }
+
+    seed(Math.floor(maxLines * 0.6));
+    newLine();
+    render();
+    requestAnimationFrame(frame);
   }
 
   /* ---- Current year ---- */
