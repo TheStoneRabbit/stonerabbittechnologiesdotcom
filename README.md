@@ -10,18 +10,22 @@ Static site — no build step, no dependencies. Plain HTML, CSS, and vanilla JS.
 ```
 index.html        # all page content
 css/styles.css    # design system + responsive layout
-js/main.js        # scroll reveals, mobile menu, stat counters, hero parallax
+js/main.js        # scroll reveals, mobile menu, stat counters
 assets/logo.png   # logo (also drives favicon)
 assets/favicon.png
 ```
 
 ## Design
-- **Palette** (sampled from the logo): white background `#ffffff`, black text
-  `#17171a`, red highlights `#e02828`. Change `--red` in `css/styles.css` to
-  re-tint every accent at once.
+- **Palette** (sampled from the logo): white background `#ffffff` with a warm
+  bone `#faf7f5` for alternating bands, warm-charcoal text `#26212a`, red
+  highlights `#e02828`. Change `--red` in `css/styles.css` to re-tint every
+  accent at once; `--red-ink` is the darkened variant used for small text so it
+  clears AA contrast on white.
 - Fully responsive (desktop → tablet → mobile) with a hamburger menu under 720px.
-- Animations: hero float + orbit rings, scroll-reveal on every section, animated
-  stat counters, pointer parallax on the logo, hover states throughout. All
+- Backgrounds stay flat white / bone — no gradient washes or glows. Depth comes
+  from soft shadows and hairline borders only.
+- Animations: floating logo inside breathing orbit rings, scroll-reveal on every
+  section, animated stat counters, and soft lift-on-hover throughout. All
   animation respects `prefers-reduced-motion`.
 
 ## Run locally
